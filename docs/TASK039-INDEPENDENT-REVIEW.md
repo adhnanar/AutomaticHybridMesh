@@ -1,0 +1,7 @@
+# Task039 independent review — 2026-10-19
+
+**Verdict: ACCEPT Python parity/test changes; C runtime acceptance remains OPEN.** Copilot idle, project path verified. Reviewed shared vectors, simulator constants and `tests/hybrid_router/CMakeLists.txt`/`prj.conf`: test target is a Zephyr ztest requiring executable environment; SDK-backed board compilation would NOT run the C tests. Copilot honestly reported sandbox block and did not claim runtime success.
+
+Independent runs via `C:\zephyrproject\.venv\Scripts\python.exe`: hybrid_router_sim **15/15 PASS**; hybrid_policy_sim **16/16 PASS**; repository root **55/55 PASS**; `tests/task024_static_tx_check.py` **PASS**. These are Python/static tests only. Existing Task038 independent default and opt-in firmware builds already verified, no new root firmware source/config changes in Task039. Remaining: actually run C ztests in a working native_sim/QEMU/portable host execution environment; do not waste agent runs repeatedly probing the same known-blocked sandbox.
+
+**Copilot credit policy (user request):** Use smallest focused Copilot implementation task; do checks/reviews using direct shell from assistant; no repetitive build or diagnostics attempts inside Copilot sandbox; avoid large exploratory reads and documentation duplication; no task-chains solely for status. Keep all board flashing and LoRa TX prohibited unless separately authorized.

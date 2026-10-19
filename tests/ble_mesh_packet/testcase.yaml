@@ -1,0 +1,9 @@
+tests:
+  hybrid_mesh.ble_mesh_packet:
+    platform_allow:
+      - native_sim
+    integration_platforms:
+      - native_sim
+    tags:
+      - bluetooth
+      - mesh

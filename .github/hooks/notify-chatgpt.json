@@ -1,0 +1,18 @@
+{
+  "hooks": {
+    "UserPromptSubmit": [
+      {
+        "type": "command",
+        "windows": "powershell.exe -NoProfile -NonInteractive -Command \"Remove-Item -LiteralPath 'C:\\zephyrproject\\hybrid-mesh-poc\\copilot_done.txt' -Force -ErrorAction SilentlyContinue\"",
+        "timeout": 10
+      }
+    ],
+    "Stop": [
+      {
+        "type": "command",
+        "windows": "powershell.exe -NoProfile -NonInteractive -Command \"Set-Content -LiteralPath 'C:\\zephyrproject\\hybrid-mesh-poc\\copilot_done.txt' -Value ('FINISHED at ' + (Get-Date -Format o))\"",
+        "timeout": 10
+      }
+    ]
+  }
+}

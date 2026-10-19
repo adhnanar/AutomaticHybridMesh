@@ -1,0 +1,5 @@
+# Task031 independent review — 2026-10-19
+
+**Conditional PC-only acceptance.** Confirmed Copilot idle and correct workspace `C:\zephyrproject\hybrid-mesh-poc`. Read the new `ble_gatt_android_name.c/.h`, Kconfig and guarded GATT changes. `CONFIG_BLE_GATT_ANDROID_DISCOVERY_NAME` defaults OFF, `BT_DEVICE_NAME_DYNAMIC` selected only when enabled; no change to deployed images. Formatter emits `Mesh-XXXXXX` from final three of six node ID bytes. Existing Task018 no-echo control retained.
+
+Independent `C:\zephyrproject\.venv\Scripts\python.exe -m unittest discover -s tests -p 'test_*.py' -q`: **48/48 PASS**. `python tests/task024_static_tx_check.py`: **PASS**. Not yet compiled by independent reviewer; Copilot's Task031 candidate and C tests failed to configure due to environment/tool sandbox, so **do not claim build or C runtime pass**. No physical device/phone verification. Current Kit1 remains Task022 LoRa RX-only; Kit2/3 topology BLE. No flashing authorized. Next task should run genuine Zephyr default-off and opt-in candidate builds using the working `python -m west` invocation and the appropriate environment, without hardware activity.

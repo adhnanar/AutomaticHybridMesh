@@ -1,0 +1,5 @@
+# Task048 independent review — 2026-10-19
+
+**Verdict: ACCEPT as Phase 5 design constraints, not implementation.** Correct repository, Copilot idle. Confirmed C router has 4 pending slots, 1,000 ms retry interval, 3 retries, and explicit QUEUED_RETRY/NO_LINK_QUEUED/LORA_BLOCKED_QUEUED/QUEUE_FULL outcomes; legacy relay still handles phone writes. Independent policy Python **16/16 PASS**, Task024 static LoRa TX safety **PASS**. Documentation accurately distinguishes GATT local acceptance, BLE controller acceptance, and over-air peer delivery, plus phone-connected `-EAGAIN` handling.
+
+**Design caution:** Task048 says to map actual hybrid-router outcomes in an integration stage without invoking `hybrid_router_send_local()`; this is NOT a real router outcome. First step must therefore use a pure result-to-GATT acceptance classifier and test it with synthetic enums; only later connect serialized worker/admission, and only after independent review. Never represent fake LoRa callback availability as actual authorized RF capability. Zero LoRa TX authorization, no radio callback, no flash/reset/hardware. Remaining Phase5 on-device hybrid integration unimplemented.

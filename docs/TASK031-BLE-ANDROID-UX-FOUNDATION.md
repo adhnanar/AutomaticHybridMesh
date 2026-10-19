@@ -1,0 +1,173 @@
+# Task031 — PC-only BLE Android UX foundation
+
+Date: 2026-10-19. **Code/config/test changes are opt-in and default-off. No
+flash, reset, USB/power action, BLE or LoRa transmission, install/download, or
+git stage/commit occurred. Stop here for independent review.**
+
+## Scope and deployment correction
+
+Add a small BLE advertising-name option that helps distinguish devices in the
+nRF Connect Android scan list. Reuse the already implemented Task018
+`CONFIG_BLE_GATT_DISCOVER_NO_ECHO` behavior rather than introducing a
+duplicate control-command suppression mechanism.
+
+The authoritative deployment correction is
+[TASK030-INDEPENDENT-REVIEW.md](./TASK030-INDEPENDENT-REVIEW.md): Kit1/A on
+COM14 currently runs Task022 LoRa RX-only; Kit2/B and Kit3/C still run BLE
+topology firmware. Therefore the A→B→C Android demo is **not possible on the
+current deployed arrangement**. This task did not change that arrangement or
+build/flash replacement firmware.
+
+## Implementation
+
+`CONFIG_BLE_GATT_ANDROID_DISCOVERY_NAME` is default-off. When enabled, the BLE
+advertising scan response and local GAP name become `Mesh-XXXXXX`, where
+`XXXXXX` is the uppercase hexadecimal representation of the last three bytes
+of the same immutable six-byte node ID already used by the relay. The label
+fits in the legacy scan response alongside the existing service UUID. It does
+not alter the node ID, mesh routing, payload, or service/characteristic UUIDs.
+
+The existing Task018 `CONFIG_BLE_GATT_DISCOVER_NO_ECHO` option is also
+default-off and already suppresses the recognized `DISCOVER` control command
+from the TX value/notification while returning a successful GATT write. It
+does not imply suppression for arbitrary future control commands unless their
+handler returns the existing control-handled result. Task018 already has a
+policy ztest for enabled/disabled behavior. Its option and implementation were
+not duplicated or otherwise changed here.
+
+### Files changed
+
+- `Kconfig` — new default-off Android discovery-name option; selects Zephyr's
+  dynamic Bluetooth device-name support only when enabled.
+- `CMakeLists.txt` — includes the feature-local formatter.
+- `src/features/ble_gatt/ble_gatt.c` — opt-in FICR node-ID-derived name in
+  advertising scan response and local GAP name; default branch retains the
+  configured `CONFIG_BT_DEVICE_NAME`.
+- `src/features/ble_gatt/ble_gatt_android_name.c` and `.h` — bounded pure
+  formatter for `Mesh-XXXXXX`.
+- `tests/ble_mesh_packet/CMakeLists.txt` and
+  `tests/ble_mesh_packet/src/main.c` — formatter output, capacity, and null
+  argument tests. The existing Task018 control-result policy test remains
+  present and unchanged.
+- `docs/PROGRESS.md` — current task and corrected Task030 deployment status.
+- `docs/TASK031-BLE-ANDROID-UX-FOUNDATION.md` — scope, evidence, limitations,
+  rollback, and next action.
+- `docs/copilot/TASK031-INDEPENDENT-REVIEW-PROMPT.md` — copy-ready review
+  handoff; no review was run by this task.
+
+No source from `C:\zephyrproject\hybrid-mesh` was consulted or copied. Stable
+Task012 firmware artifacts and Task012 source/configuration were not modified.
+
+## PC verification — actual results
+
+### Baseline artifact hashes
+
+SHA-256 before and after the failed build attempts:
+
+| Existing artifact | SHA-256 | Result |
+|---|---|---|
+| `build-task012-default/zephyr/zephyr.uf2` | `2575E7133E4B1795EF4D3A88C2B1115919F90E39A0E803C4FB10342E880D1F14` | unchanged |
+| `build-task012-topology/zephyr/zephyr.uf2` | `D5E9EF84540C50E28F79AA47D78591F5E2592B871E3658C61269D896640FEEB8` | unchanged |
+| `build-task022-uk-receiver/zephyr/zephyr.uf2` | `28C2852D6C714D428D0269ECAF48BC3E8ACEEAFFF4D672E69BAEDECD738C4644` | unchanged; recorded for future rollback |
+
+These are hashes of the existing files, not proof that this source revision
+rebuilds to the same Task012 image. No baseline rebuild completed.
+
+### Commands and build/test status
+
+- `Get-FileHash -Algorithm SHA256` for the two Task012 UF2s and the Task022
+  RX-only UF2: **PASS**; values above match the previously recorded Task018
+  and Task022 hashes.
+- `Select-String` of the existing
+  `build-task018-noecho-independent/zephyr/.config`: confirmed
+  `CONFIG_BLE_GATT_DISCOVER_NO_ECHO=y`; its prior Task018 UF2 exists. This is
+  prior evidence only, not a Task031 build.
+- `cmake --build build-task018-gatt-policy-ztest-independent --parallel 4`:
+  **BLOCKED before compilation**. Ninja attempted to read
+  `C:/Users/adhna/zephyr-sdk-1.0.1/cmake/Zephyr-sdkConfig.cmake`; the sandbox
+  returned **Access is denied**.
+- Fresh candidate and native-test CMake configure commands, each supplied
+  `-DZEPHYR_BASE=C:/zephyrproject/zephyr`: **FAILED before generation** because
+  this repository's `find_package(Zephyr ...)` uses the `ZEPHYR_BASE`
+  environment variable (`$ENV{ZEPHYR_BASE}`), and the variable was not set in
+  the shell. No candidate firmware or test binary was generated by these
+  commands.
+- `Get-Command west`: no `west` command was available on the current shell
+  `PATH`; no package or tool was installed.
+- The two new C formatter tests and the existing no-echo policy test were
+  **not executed**. Android/nRF Connect behavior was not tested.
+- `Remove-Item -LiteralPath build-task031-android-candidate,build-task031-ztest-native
+  -Recurse -Force`: **BLOCKED** with Access is denied. These partial build
+  directories may remain; no alternate cleanup attempt was made.
+
+The SDK and partial-build-directory access denials are sandbox boundaries. Do
+not work around them by calling the same paths through another tool. If
+build/test evidence or cleanup is required, the sandbox policy must first
+allow access to the denied paths.
+
+## Android usability limits
+
+- The proposed name differentiates scanners by a short node-ID suffix; it is
+  not a user-assigned contact/profile name and does not identify A/B/C roles.
+- Discovery and TX remain the existing one-slot characteristics. No inbox,
+  message history, delivery acknowledgment, or retry guarantee is added.
+- The existing no-echo control is only verified as PC policy-code coverage in
+  prior Task018 work; it is not deployed on Kit1/2/3 and not demonstrated on
+  Android.
+- The Android app remains nRF Connect. This repository provides no evidence
+  of Android status-bar alerts, background delivery, vibration, or screen-off
+  notification behavior; only foreground GATT interaction is in scope.
+- Current Kit1/Kit2/Kit3 deployment cannot provide the A→B→C demo because
+  Kit1 is the Task022 LoRa RX-only receiver. No firmware was changed to make
+  that demo appear available.
+- Existing BLE text remains short, unauthenticated, unencrypted, and
+  unaddressed. The name option does not improve privacy or delivery semantics.
+
+## Future Kit1 BLE restore plan — requires new explicit user approval
+
+No physical step is authorized or performed by Task031. If the user later
+chooses to restore the Task012 BLE A role:
+
+1. Obtain explicit approval to replace Kit1/COM14's current Task022 LoRa
+   RX-only role with BLE. Do not infer approval from this plan or from old
+   README deployment notes.
+2. Before any physical action, verify the intended target is Kit1/COM14 and
+   Kit2/B and Kit3/C remain on their current BLE topology images. Confirm the
+   on-disk candidate artifact
+   `build-task012-topology/zephyr/zephyr.uf2` has SHA-256
+   `D5E9EF84540C50E28F79AA47D78591F5E2592B871E3658C61269D896640FEEB8`.
+   Confirm its generated config has `CONFIG_BLE_MESH_TEST_TOPOLOGY=y` and
+   `CONFIG_BLE_MESH_TEST_B_ID_0C13=y`, matching the Task012 B node ID.
+3. Only after a separate, explicit flash authorization, the user may put
+   Kit1 alone into its UF2 bootloader and install that exact Task012 topology
+   image. Do not touch Kits2/3, erase, or change a bootloader. Do not enable
+   LoRa TX or perform any RF transmission.
+4. After the user reports completion, verify COM14 output identifies the
+   BLE mesh node and expected A role; then perform a separately authorized
+   Android/PC GATT acceptance run. No A→B→C success is claimed until observed.
+5. If the restore is rejected or must be undone, first obtain explicit
+   authorization for the rollback flash. Use only
+   `build-task022-uk-receiver/zephyr/zephyr.uf2` with SHA-256
+   `28C2852D6C714D428D0269ECAF48BC3E8ACEEAFFF4D672E69BAEDECD738C4644` on
+   Kit1, then verify the Task022 RX-only banner and
+   `TASK022_RX_WAIT_NO_PACKET`. This returns Kit1 to receive-only operation;
+   it does not transmit LoRa.
+
+## Rollback
+
+This task did not modify the stable Task012 UF2 files or any hardware. For a
+future build, omitting `CONFIG_BLE_GATT_ANDROID_DISCOVERY_NAME` (default `n`)
+preserves the configured name and the existing default advertising branch.
+To remove the source change, delete only the Task031 Kconfig option, the
+feature-local formatter files and their CMake entries, the guarded GATT name
+path, and the two formatter tests. Keep the pre-existing Task018 no-echo
+option intact. Do not use a broad revert or stage/commit unrelated untracked
+files.
+
+## Next action
+
+**STOP for independent review** using
+[TASK031-INDEPENDENT-REVIEW-PROMPT.md](./copilot/TASK031-INDEPENDENT-REVIEW-PROMPT.md).
+Resolve build access through the sandbox policy before claiming build or test
+success. Android evidence, Kit1 restoration, and all physical acceptance
+checks remain open.

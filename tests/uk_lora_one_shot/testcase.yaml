@@ -1,0 +1,16 @@
+tests:
+  hybrid_mesh.uk_lora_one_shot.locked:
+    platform_allow:
+      - qemu_cortex_m3
+    integration_platforms:
+      - qemu_cortex_m3
+    tags:
+      - lora
+      - regulatory
+  hybrid_mesh.uk_lora_one_shot.allow_hostonly:
+    platform_allow:
+      - qemu_cortex_m3
+    extra_args: ONE_SHOT_TEST_ALLOW=ON
+    tags:
+      - lora
+      - regulatory

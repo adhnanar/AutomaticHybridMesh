@@ -1,0 +1,1 @@
+Task010 copy-ready prompt: confirm the scan duplicate-filter fix on hardware only after explicit user flash approval of docs/TASK010-SCAN-DUPLICATE-FILTER-FIX.md artifact. Capture 60 s idle compact HB lines for B/C, then run tests/task009_capture_both_consoles.py without a GATT connection to C during relay, and record evidence in Markdown plus docs/PROGRESS.md.

@@ -1,0 +1,10 @@
+# Task034 independent review — 2026-10-19
+
+**Verdict: ACCEPT PC-only build for opt-in BLE inbox GATT integration; no phone/hardware acceptance.** Correct workspace `C:\zephyrproject\hybrid-mesh-poc`; Copilot idle. Copilot wrote a GATT read-only UUID 7B3E0006-6F2A-4C91-9A3D-2F5B6C7D8E00 and received-text hook guarded by default-off CONFIG_BLE_INBOX, snapshots per connection to avoid torn Read Blob. Source-level Python checks alone were inadequate; reviewer independently built both images.
+
+- `C:\zephyrproject\.venv\Scripts\python.exe -m unittest discover -s tests -p 'test_*.py' -q`: **55/55 PASS**. `python tests/task024_static_tx_check.py`: **PASS**.
+- Process-local ZEPHYR_BASE and pristine west build of root `xiao_ble/nrf52840` default, `build-task034-independent-default`: **274/274 PASS**, FLASH 134072 bytes, RAM 30472 bytes, UF2 SHA256 `2575E7133E4B1795EF4D3A88C2B1115919F90E39A0E803C4FB10342E880D1F14`, exactly matches prior Task012 default artifact.
+- Opt-in build with process-local `EXTRA_CONF_FILE=tests/task033_inbox_optin.conf`, `build-task034-independent-inbox`: **276/276 PASS**, FLASH 134880 bytes, RAM 30856 bytes, UF2 SHA256 `8A23CF3261114E9DB52D5DDDFECADB66E2B2B690FAEE2EB50D3C8A1AD080799C`; `.config` confirms CONFIG_BLE_INBOX=y.
+- Not run: C ztest execution, Android GATT read, phone background notification tests, any hardware flash or RF. Kit1 remains LoRa RX-only; Kit2/3 existing BLE. No LoRa TX authorization. Avoid claiming final functionality from compile alone. Read Blob snapshot requires physical validation, including connection resets, multiple reads and incoming RX during read.
+
+Roadmap judgment: controlled BLE A->B->C proof passed earlier, but current three-board deployment does not permit that exact test without Kit1 restore. Overall full hybrid PoC estimated ~45% complete (qualitative, not earned-value), because LoRa TX and auto BLE/LoRa switch and Android end-to-end acceptance remain. Prioritize closing hybrid interoperability and field gates, not indefinite UI polish.

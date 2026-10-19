@@ -1,0 +1,7 @@
+# Task040 independent review — 2026-10-19
+
+**Verdict: ACCEPT as a design draft, with implementation split required.** Confirmed correct repo and Copilot idle. Verified `scan_receive` discards RSSI, RX queue currently stores `ble_mesh_packet`, and legacy phone write path bypasses hybrid router. Contract accurately flags phone-connected `-EAGAIN`, lack of delivery ACK, aggregate peer reachability and serialized router state.
+
+**Required refinement before routing Android writes:** its existing synchronous GATT return/echo contract must be preserved even if hybrid router operations are later moved into a serialized worker. A two-phase asynchronous enqueue could otherwise incorrectly return success for eventual queue failure. Do not replace the legacy relay path in a single large change, double-apply dedup, or treat an RSSI report from relayed-origin source ID as destination-specific proximity. In particular preserve existing advertising cache behavior on `-EAGAIN` and enforce separate LoRa authorization false with no physical callback.
+
+**Accepted next small safe step:** carry RSSI alongside validated BLE RX frames in a private queue entry, optionally track it for future policy integration, but do not call router, change BLE publication, notifications, advertising, default GATT behavior, LoRa or radio configuration. Build/test independently after Copilot. Task040 was documentation-only; no execution evidence implied.

@@ -1,0 +1,9 @@
+tests:
+  hybrid_mesh.lora_transport:
+    platform_allow:
+      - native_sim
+    integration_platforms:
+      - native_sim
+    tags:
+      - lora
+      - mesh

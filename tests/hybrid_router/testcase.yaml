@@ -1,0 +1,10 @@
+tests:
+  hybrid_mesh.hybrid_router:
+    platform_allow:
+      - native_sim
+      - xiao_ble/nrf52840
+    integration_platforms:
+      - native_sim
+    tags:
+      - router
+      - mesh

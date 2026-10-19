@@ -1,0 +1,67 @@
+mainmenu "Hybrid Mesh PoC"
+
+source "Kconfig.zephyr"
+
+config BLE_GATT_DISCOVER_NO_ECHO
+	bool "Do not echo DISCOVER control writes as TX text notifications"
+	default n
+	help
+	  When enabled, a DISCOVER write to the GATT RX characteristic still
+	  succeeds and publishes discovery notifications, but is not notified
+	  on or stored in the TX text characteristic. Default off preserves
+	  the existing behavior.
+
+config BLE_GATT_ANDROID_DISCOVERY_NAME
+	bool "Advertise a short unique BLE name for Android discovery"
+	depends on BT
+	select BT_DEVICE_NAME_DYNAMIC
+	default n
+	help
+	  Advertise the node as Mesh-<last six hex digits of its mesh node ID>
+	  so nearby nodes are distinguishable in nRF Connect. This changes only
+	  the advertising name; the mesh identity and routing behavior are
+	  unchanged. Default off preserves the configured Bluetooth device name.
+
+config BLE_MESH_TEST_TOPOLOGY
+	bool "Enable controlled BLE two-hop test topology"
+	default n
+	help
+	  Restrict TEXT routing to the test-only A -> B -> C topology.
+	  This must remain disabled for normal mesh operation.
+
+choice BLE_MESH_TEST_B_NODE_ID
+	prompt "Immutable mesh source ID assigned to relay B"
+	depends on BLE_MESH_TEST_TOPOLOGY
+	optional
+	help
+	  Select the board's immutable mesh ID only after confirming physical
+	  Kit 2/3 mapping. The other ID is assigned role C.
+
+config BLE_MESH_TEST_B_ID_0C13
+	bool "0c13dae125c8"
+
+config BLE_MESH_TEST_B_ID_EE07
+	bool "ee07145a5e02"
+
+endchoice
+
+config BLE_INBOX
+	bool "Bounded RAM inbox of recent received text messages (foundation)"
+	default n
+	help
+	  Compiles the ble_inbox ring buffer and exposes it as a read-only GATT
+	  characteristic 7b3e0006-6f2a-4c91-9a3d-2f5b6c7d8e00 in the hybrid
+	  service. Fed only with remote TEXT frames accepted by the mesh RX path
+	  (source ID + text; no local echo or control frames). RAM only, lost on
+	  reset; unauthenticated, no delivery guarantee, no background phone
+	  notification. Default off leaves the image unchanged.
+
+config HYBRID_ROUTER_POLICY
+	bool "Compile the opt-in hybrid BLE/LoRa router policy foundation"
+	default n
+	help
+	  Compiles the software-only hybrid router into the application. This does
+	  not connect radio drivers or enable LoRa transmission. LoRa remains
+	  ineligible until an external integration explicitly grants runtime TX
+	  authorization through the router API. Default off preserves the current
+	  application image and routing behavior.

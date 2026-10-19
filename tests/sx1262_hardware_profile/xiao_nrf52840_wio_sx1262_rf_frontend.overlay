@@ -1,0 +1,29 @@
+/* Task017 experimental Wio-SX1262 frontend variant, never auto-selected.
+ * Uses Seeed module RF-switch clarification and Meshtastic nRF-kit pin evidence.
+ * NOT validated on physical radio. Never flash/transmit until region and
+ * installed hardware revision are confirmed.
+ */
+#include <zephyr/dt-bindings/gpio/gpio.h>
+#include <zephyr/dt-bindings/lora/sx126x.h>
+
+&i2c1 {
+    status = "disabled";
+};
+
+&xiao_spi {
+    status = "okay";
+    cs-gpios = <&gpio0 4 GPIO_ACTIVE_LOW>;
+
+    sx1262: sx1262@0 {
+        compatible = "semtech,sx1262";
+        reg = <0>;
+        spi-max-frequency = <1000000>;
+        reset-gpios = <&gpio0 28 GPIO_ACTIVE_LOW>;
+        busy-gpios = <&gpio0 29 GPIO_ACTIVE_HIGH>;
+        dio1-gpios = <&gpio0 3 GPIO_ACTIVE_HIGH>;
+        rx-enable-gpios = <&gpio0 5 GPIO_ACTIVE_HIGH>;
+        dio2-tx-enable;
+        dio3-tcxo-voltage = <SX126X_DIO3_TCXO_1V8>;
+        status = "okay";
+    };
+};

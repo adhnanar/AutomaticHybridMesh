@@ -1,0 +1,7 @@
+﻿# Ignore generated Zephyr build outputs
+build/
+build-*/
+.venv/
+.west/
+*.log
+.DS_Store

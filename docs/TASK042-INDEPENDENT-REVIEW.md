@@ -1,0 +1,7 @@
+# Task042 independent review — 2026-10-19
+
+**Verdict: ACCEPT opt-in no-radio router RSSI feed, not live hybrid routing.** Confirmed Copilot idle and repo `C:\zephyrproject\hybrid-mesh-poc`. Reviewed guarded `hybrid_router_state` initialization with zeroed callbacks, RX worker feed after self-source filtering, and no changes to phone writes, dedup, advertising or real transport dispatch. Under CONFIG_HYBRID_ROUTER_POLICY the worker supplies `k_uptime_get_32()` and validated packet RSSI. No LoRa TX callback or authorization; default behavior unaffected by this guarded integration.
+
+Independent checks using the existing Windows Zephyr SDK/venv: repository Python **55/55 PASS**, router-reference Python **15/15 PASS**, Task024 static TX safety **PASS**. Incremental `cmake --build build-task038-independent-policy --parallel 1`: **7/7 PASS**, UF2 SHA256 `79CDAC07A83ED3BBB1BADA35A3619D2DAC7B0F71D0435620F90BAEA44C13418F`. Incremental `cmake --build build-task038-independent-default --parallel 1`: **7/7 PASS**, UF2 SHA256 `2E0E993695081A75898B542724A3DCA7DD8D2F614AC09F033B846C6F2F5B20AC`, same as Task041 default. Images are PC artifacts and **not flashed**. No C runtime test or hardware BLE acceptance for this new feed yet; next add a deterministic test seam/fake frame check, keeping code minimal.
+
+Copilot-credit policy remains in AGENTS.md item 13: short focused tasks, assistant runs tests/builds, no redundant Copilot toolchain probes. Kits remain unchanged; no LoRa TX.
